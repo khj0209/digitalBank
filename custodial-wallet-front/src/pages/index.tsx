@@ -17,9 +17,9 @@ export default function Home() {
       className={`${geistSans.variable} ${geistMono.variable} flex flex-col items-center justify-center min-h-screen bg-gray-50`}
     >
       <div className="w-full max-w-4xl flex flex-col items-center">
-        <h1 className="text-4xl font-bold mb-4">1Q Wallet</h1>
+        <h1 className="text-4xl font-bold mb-4">DigitalBanking</h1>
         <p className="text-lg text-gray-700 mb-8 text-center max-w-2xl">
-          1Q Wallet은 안전하고 간편한 디지털 자산 관리 서비스를 제공합니다. 
+          DigitalBanking은 안전하고 간편한 디지털 자산 관리 서비스를 제공합니다. 
         </p>
         <div className="mb-8 w-full max-w-2xl">
           <h2 className="text-2xl font-semibold mb-2">주요 페이지 안내</h2>

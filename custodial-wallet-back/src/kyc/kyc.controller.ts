@@ -8,7 +8,6 @@ export class KycController {
         private readonly kycService: KycService
     ) {}
 
-
     @Post('register')
     async registerKyc(
         @Body() body: { userId: string; name: string; phoneNumber: string; homeAddress: string; }

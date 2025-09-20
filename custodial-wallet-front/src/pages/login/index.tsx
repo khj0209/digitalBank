@@ -68,7 +68,7 @@ export default function LoginPage() {
   return (
         <div className="login-bg">
       <div className="login-container">
-        <h2 className="login-title">1Q Wallet으로 로그인</h2>
+        <h2 className="login-title">DigitalBanking 로그인</h2>
         <div className="login-field">
           <label className="login-label" htmlFor="username">
             아이디

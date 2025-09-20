@@ -136,7 +136,7 @@ export default function WalletService() {
   return (
     <div className="App">
       <header className="App-header">
-        <div className="absolute top-4 left-4">
+        {/* <div className="absolute top-4 left-4">
           <select
             value={selectedChain}
             onChange={handleChainChange}
@@ -149,7 +149,7 @@ export default function WalletService() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
         <div className="wallet-box">
           {isWallet ? (
             <div>
@@ -192,7 +192,7 @@ export default function WalletService() {
                     {mpt.balance || 0} {mpt.ticker}
                     </p>
                     <div>
-                      <input
+                      {/* <input
                         type="text"
                         placeholder="수량"
                         className="wallet-input"
@@ -203,11 +203,11 @@ export default function WalletService() {
                         placeholder="보낼주소"
                         className="wallet-input"
                         onChange={(e) => setTo(e.target.value)}
-                      />
+                      /> */}
                       <button onClick={sendTx} className="wallet-btn">
                         전송
                       </button>
-                      <button onClick={swapToken} className="wallet-btn">
+                      <button onClick={swapToken} className="wallet-input">
                         교환
                       </button>
                     </div>
