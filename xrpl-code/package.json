@@ -1,0 +1,16 @@
+{
+  "name": "xrpl-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "XRPL utilities and examples",
+  "keywords": ["xrpl"],
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "xrpl": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
