@@ -11,7 +11,7 @@ export async function sendMPT() {
   await client.connect()
 
   const ADMIN_SEED = process.env.ADMIN_SEED
-  const USER_SEED  = "sEdVWbbYzNVQsB2sUNMo9hbtqwP8Lff"
+  const USER_SEED  = process.env.USER_SEED
   if (!ADMIN_SEED || !USER_SEED) throw new Error("Missing env: ADMIN_SEED, USER_SEED")
 
   const admin = Wallet.fromSeed(ADMIN_SEED)
@@ -22,8 +22,8 @@ export async function sendMPT() {
     Account: admin.address,
     Destination: user.address,
     Amount: {
-      mpt_issuance_id: "0060B3DDC66F32EA63421E5B16363F691BD44FB547A7FA35",
-      value: "1000"
+      mpt_issuance_id: "0060B401C66F32EA63421E5B16363F691BD44FB547A7FA35",
+      value: "100"
     }
     // 필요시 DeliverMax/SendMax도 같은 구조로 추가 가능
   }

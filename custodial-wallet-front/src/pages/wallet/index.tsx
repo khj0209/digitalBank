@@ -17,6 +17,7 @@ export default function WalletService() {
   const [client, setClient] = useState<Client | null>(chains[0].clientUrl ? new Client(chains[0].clientUrl) : null);
   const [account, setAccount] = useState<string>("");
   const [balance, setBalance] = useState<string>("");
+  const [mpts, setMpts] = useState<any[]>([]);
   const [isWallet, setIsWallet] = useState(false);
   const [to, setTo] = useState<string>("");
   const [value, setValue] = useState('');
@@ -46,7 +47,27 @@ export default function WalletService() {
     } catch (error) {
       console.error('Error fetching balance:', error);
     }
+  }
 
+  const getBalanceMpts = async () => {
+    const address = sessionStorage.getItem("account") || "";
+    if(address === "") {
+      console.log("지갑 주소가 없습니다. 지갑을 생성해주세요.");
+      return;
+    }
+    // 자산 내역 조회
+    try {
+      const res = await api.post('/mptoken/get', {
+        userId: localStorage.getItem("userId"),
+        // userSeed: localStorage.getItem("userSeed"),
+      });
+      console.log('MPT Balance:', res.data);
+      // setBalance(bal ? (parseInt(bal) / 1000000).toString() : "0");
+      setMpts(res.data.mpts || []);
+
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+    }
   }
 
   useEffect(() => {
@@ -54,8 +75,9 @@ export default function WalletService() {
     if(account!==""){
       setIsWallet(true);
       getBalance();
+      getBalanceMpts();
     }
-  },);
+  },[account]);
 
   const handleChainChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
@@ -99,6 +121,8 @@ export default function WalletService() {
     }
   };
 
+  const swapToken = async () => {
+  }
   // 주소 복사 함수
   const copyAddress = () => {
     const address = sessionStorage.getItem("account") || "";
@@ -141,32 +165,61 @@ export default function WalletService() {
                   <img src="/copy.png" alt="복사" width={28} height={28} />
                 </button>
               </div>
-              <p className="wallet-balance">
-                Balance: {balance} {selectedChainSymbol}
-              </p>
+              <div>
+              <button onClick={sendTx} className="wallet-btn">
+                  +
+                </button>
+                </div>
+                <div className="wallet-mpts">
+                  {mpts.map((mpt, index) => (
+                  <div
+                    key={index}
+                    className="wallet-mpt-item"
+                    style={{
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    marginBottom: "10px",
+                    backgroundColor: "#f9f9f9",
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <p className="wallet-account">
+                    {mpt.name}
+                    </p>
+                    <p className="wallet-account">
+                    Balance:
+                    {mpt.balance || 0} {mpt.ticker}
+                    </p>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="수량"
+                        className="wallet-input"
+                        onChange={(e) => setValue(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="보낼주소"
+                        className="wallet-input"
+                        onChange={(e) => setTo(e.target.value)}
+                      />
+                      <button onClick={sendTx} className="wallet-btn">
+                        전송
+                      </button>
+                      <button onClick={swapToken} className="wallet-btn">
+                        교환
+                      </button>
+                    </div>
+                  </div>
+                  ))}
+                </div>
             </div>
           ) : (
             <button onClick={createWallet} className="wallet-create-btn">
               Wallet 생성
             </button>
           )}
-          <div>
-            <input
-              type="text"
-              placeholder="수량"
-              className="wallet-input"
-              onChange={(e) => setValue(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="보낼주소"
-              className="wallet-input"
-              onChange={(e) => setTo(e.target.value)}
-            />
-            <button onClick={sendTx} className="wallet-btn">
-              Send
-            </button>
-          </div>
         </div>
       </header>
     </div>

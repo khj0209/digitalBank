@@ -13,10 +13,12 @@ export class MptokenController {
 
   @Post('get')
   async getMptokens(
-    @Body('userSeed') userSeed: string
+    // @Body('userSeed') userSeed: string
+    @Body('userId') userId: string
   ) {
  
-    return this.mptokenService.getBalance(userSeed);
+    // return this.mptokenService.getBalance(userSeed);
+    return this.mptokenService.getBalanceOfMpts(userId)
   }
 
   /**
@@ -62,11 +64,13 @@ export class MptokenController {
   }
 
   @Post('authorize')
-  async authorizeMpt(@Body() dto: AuthorizeMptDto) {
-    const { issuanceId, userSeed } = dto
-    if (!issuanceId || !userSeed) throw new Error('IssuanceID와 userSeed 필요')
+  async authorizeMpt(
+    @Body('userId') userId: string,
+    @Body('issuanceId') issuanceId: string
+  ) {
+    if (!issuanceId || !userId) throw new Error('IssuanceID와 userId 필요')
 
-    const result = await this.mptokenService.authorizeMptoken(issuanceId, userSeed)
+    const result = await this.mptokenService.authorizeMptoken(issuanceId, userId)
     return { success: true, result }
   }
 }

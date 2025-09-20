@@ -21,7 +21,7 @@ export class MptokenService {
       // 계정이 가진 모든 MPToken 객체 조회
       const response = await client.request({
         command: "account_objects",
-        account: wallet.account,
+        account: wallet.address,
         ledger_index: "validated",
         type: "mptoken"
       })
@@ -33,11 +33,35 @@ export class MptokenService {
         return { address: wallet.address, mpts: [] }
       }
 
+      console.log(mptTokens);
+
       // IssuanceID와 Balance만 추출
       const mpts = mptTokens.map((token: any) => ({
         issuanceId: token.MPTokenIssuanceID,
-        balance: token.MPTAmount
+        balance: token.MPTAmount,
+        name: null,
+        ticker: null
       }))
+
+      // DB에서 IssuanceID 기반으로 토큰 이름, 티커 조회
+      const issuanceIds = mptTokens.map((t: any) => t.MPTokenIssuanceID)
+      const query = `
+        SELECT issuance_id, name, ticker
+        FROM mptokens
+        WHERE issuance_id = ANY($1)
+      `
+      const dbResult = await this.db.query(query, [issuanceIds])
+      const issuanceMap: Record<string, { name: string; ticker: string }> = {}
+      dbResult.rows.forEach(row => {
+        issuanceMap[row.issuance_id] = { name: row.name, ticker: row.ticker }
+      })
+
+      // 잔액 + 토큰 메타데이터 조합
+      mpts.forEach(token => {
+        token.name = issuanceMap[token.issuanceId]?.name ?? null
+        token.ticker = issuanceMap[token.issuanceId]?.ticker ?? null
+      })
+
 
       return {
         address: wallet.address,
@@ -186,12 +210,18 @@ export class MptokenService {
   /**
    * 사용자 MPT 수락(opt-in)
    */
-  async authorizeMptoken(issuanceId: string, userSeed: string) {
+  async authorizeMptoken(issuanceId: string, userId: string) {
     const client = new Client('wss://s.devnet.rippletest.net:51233');
     await client.connect();
 
     try {
-      if (!issuanceId || !userSeed) throw new Error('IssuanceID와 userSeed 필요');
+      if (!issuanceId || !userId) throw new Error('IssuanceID와 userId 필요');
+
+      const userSeed = await this.db.query(
+        'SELECT seed FROM wallets WHERE user_id = $1 LIMIT 1',
+        [userId],
+      ).then(result => result.rows[0]?.seed);
+      if (!userSeed) throw new Error('User wallet not found');
 
       const userWallet = Wallet.fromSeed(userSeed);
 
@@ -213,7 +243,7 @@ export class MptokenService {
 
   async findWalletByUserId(userId: string) {
     const wallet = await this.db.query(
-      'SELECT address, public_key FROM wallets WHERE user_id = $1 LIMIT 1',
+      'SELECT address, seed FROM wallets WHERE user_id = $1 LIMIT 1',
       [userId],
     );
     return wallet.rows[0];
