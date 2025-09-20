@@ -19,28 +19,31 @@ export class WalletService {
     const wallet = Wallet.generate();    
     await client.fundWallet(wallet);
     const address = wallet.classicAddress;
-    const privateKey = wallet.privateKey;
-    const pubkey = wallet.publicKey;
+    const seed = wallet.seed;
 
     console.log('Generated wallet address:', address);
-    console.log('Generated wallet private key:', privateKey);
-    console.log('Generated wallet public key:', pubkey);
-
-    //privateKey bcypt로 암호화
-    const algorithm = 'aes-256-cbc';
-    const key = crypto.scryptSync(process.env.ENCRYPTION_SECRET, 'salt', 32);
-    const iv = crypto.randomBytes(16);
-
-    const cipher = crypto.createCipheriv(algorithm, key, iv);
-    let encrypted = cipher.update(privateKey, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    const encryptPrivateKey = `${iv.toString('hex')}:${encrypted}`;
-    console.log('Encrypted private key:', encryptPrivateKey);
-
+    console.log('Generated wallet seed:', seed);
     // DB에 저장
-    await this.save(userId, address, encryptPrivateKey, pubkey);
+    await this.save(userId, address, seed);
 
     return {address};
+  }
+
+  async createCredential(userId: string) {
+    const walletData = await this.findWalletByUserId(userId);
+    if (!walletData) {
+      throw new Error('Wallet not found for user');
+    }
+    
+    const { address, seed } = walletData;
+
+    const client = new Client(process.env.NEXT_PUBLIC_NODE_WS);
+    await client.connect();
+    const wallet = Wallet.fromSeed(seed);
+    console.log('Creating credential with wallet address:', address);
+
+    
+
   }
 
   async signTransaction(userId: string, tx: Transaction) {
@@ -49,10 +52,9 @@ export class WalletService {
       throw new Error('Wallet not found for user');
     }
     
-    const { address, private_key } = walletData;
-    const decryptedPrivateKey = await bcrypt.decrypt(private_key);
+    const { address, seed } = walletData;
     
-    const wallet = Wallet.fromSeed(decryptedPrivateKey);
+    const wallet = Wallet.fromSeed(seed);
     console.log('Signing transaction with wallet address:', address);
     
     // // 예시 트랜잭션 (XRP 송금)
@@ -79,16 +81,16 @@ export class WalletService {
   }
 
 
-  async save(userId: string, address: string, privateKey: string, pubkey: string) {
+  async save(userId: string, address: string, seed: string) {
     await this.db.query(
-      'INSERT INTO wallets (user_id, address, private_key, public_key) VALUES ($1, $2, $3, $4)',
-      [userId, address, privateKey, pubkey],
+      'INSERT INTO wallets (user_id, address, seed) VALUES ($1, $2, $3)',
+      [userId, address, seed],
     );
   }
 
   async findWalletByUserId(userId: string) {
     const wallet = await this.db.query(
-      'SELECT address, public_key FROM wallets WHERE user_id = $1 LIMIT 1',
+      'SELECT address, seed FROM wallets WHERE user_id = $1 LIMIT 1',
       [userId],
     );
     return wallet.rows[0];
