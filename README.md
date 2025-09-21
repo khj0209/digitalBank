@@ -11,8 +11,8 @@
 
 👉 **[데모 영상 링크]**
 
-[크레덴셜 시연 영상](https://youtube.com/shorts/37RUpyahj9c?feature=share)
-[MPToken 확인 영상] (https://youtube.com/shorts/lWwTjhlIWlU?feature=share)
+- [크레덴셜 시연 영상](https://youtube.com/shorts/37RUpyahj9c?feature=share)
+- [MPToken 확인 영상](https://youtube.com/shorts/lWwTjhlIWlU?feature=share)
 ---
 
 ## 🛠️ 기술 스택
